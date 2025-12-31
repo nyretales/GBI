@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Box Indonesia - Menu & Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS VARIABLES & RESET --- */
+        :root {
+            --primary: #2e7d32;
+            --primary-dark: #1b5e20;
+            --accent: #ffab00;
+            --bg-body: #f4f8f4;
+            --white: #ffffff;
+            --text-dark: #333333;
+            --price: #d32f2f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-dark); padding-bottom: 100px; }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--white);
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .hero-logo {
+            width: 120px;
+            height: 120px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 5px;
+            border: 3px solid var(--accent);
+            margin-bottom: 10px;
+            object-fit: contain;
+        }
+        .hero h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        .hero p { font-size: 0.9rem; opacity: 0.9; }
+
+        /* --- CONTAINER --- */
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+        
+        .category-title {
+            color: var(--primary-dark);
+            font-size: 1.2rem;
+            border-left: 5px solid var(--accent);
+            padding-left: 10px;
+            margin: 30px 0 15px;
+            font-weight: 700;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 kolom di HP */
+            gap: 15px;
+        }
+
+        /* --- FOOD CARD DESIGN --- */
+        .food-card {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        
+        .food-card.active { border-color: var(--primary); background-color: #f1f8e9; }
+
+        .card-img {
+            width: 100%;
+            height: 140px; /* Tinggi gambar seragam */
+            background-color: #e0e0e0;
+            object-fit: cover;
+        }
+
+        .card-info { padding: 10px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-name { font-size: 0.9rem; font-weight: 600; margin-bottom: 5px; line-height: 1.3; min-height: 38px; display: flex; align-items: center; }
+        .card-price { color: var(--price); font-weight: 700; font-size: 0.95rem; margin-bottom: 10px; }
+
+        /* --- ACTION BUTTONS --- */
+        .action-area { margin-top: auto; }
+        
+        .btn-add {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .qty-control {
+            display: none;
+            align-items: center;
+            background: #e8f5e9;
+            border-radius: 20px;
+            overflow: hidden;
+            width: 100%;
+            justify-content: space-between;
+            border: 1px solid var(--primary);
+        }
+
+        .btn-qty {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .qty-display {
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+            width: 30px;
+            text-align: center;
+        }
+
+        /* --- CHECKOUT BAR --- */
+        .bottom-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background-color: var(--white);
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+            border: 2px solid var(--primary);
+        }
+
+        @keyframes slideUp { from {bottom: -100px;} to {bottom: 20px;} }
+
+        .total-info { display: flex; flex-direction: column; }
+        .total-items { font-size: 0.8rem; color: #666; }
+        .total-price { font-weight: 800; color: var(--text-dark); font-size: 1.1rem; }
+
+        .btn-checkout {
+            background-color: #25d366;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+        }
+
+        /* Desktop View */
+        @media (min-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
+            .card-img { height: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <img src="img/Logo.png" alt="Green Box" class="hero-logo" onerror="this.style.display='none'">
+        <h1>Green Box Indonesia</h1>
+        <p>Pilih menu, otomatis total, langsung kirim WA!</p>
+    </header>
+
+    <div class="container">
+        
+        <h3 class="category-title">Makanan Berat</h3>
+        <div class="menu-grid">
+            <div class="food-card" id="card-1">
+                <img src="img/Nasi Kuning Ayam.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Nasi Kuning Ayam</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-1', 'Nasi Kuning Ayam', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-1', 'Nasi Kuning Ayam', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-1', 'Nasi Kuning Ayam', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-2">
+                <img src="img/Nasi Kuning Gareppe Udang.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Nasi Kuning Gareppe Udang</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-2', 'Nasi Kuning Gareppe Udang', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-2', 'Nasi Kuning Gareppe Udang', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-2', 'Nasi Kuning Gareppe Udang', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-3">
+                <img src="img/Nasi Kuning Gareppe Ikan.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Nasi Kuning Gareppe Ikan</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-3', 'Nasi Kuning Gareppe Ikan', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-3', 'Nasi Kuning Gareppe Ikan', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-3', 'Nasi Kuning Gareppe Ikan', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-4">
+                <img src="img/Nasi Kuning Ati Ampla.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Nasi Kuning Ati Ampla</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-4', 'Nasi Kuning Ati Ampla', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-4', 'Nasi Kuning Ati Ampla', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-4', 'Nasi Kuning Ati Ampla', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-5">
+                <img src="img/Rice Bowl Ayam Suwir.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Rice Bowl Ayam Suwir</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-5', 'Rice Bowl Ayam Suwir', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-5', 'Rice Bowl Ayam Suwir', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-5', 'Rice Bowl Ayam Suwir', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-6">
+                <img src="img/Nasi Kuning Telur.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Nasi Kuning Telur</div>
+                    <div class="card-price">8K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-6', 'Nasi Kuning Telur', 8000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-6', 'Nasi Kuning Telur', 8000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-6', 'Nasi Kuning Telur', 8000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="category-title">Snack & Bakaran</h3>
+        <div class="menu-grid">
+            <div class="food-card" id="card-7">
+                <img src="img/Dimsum.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Dimsum</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-7', 'Dimsum', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-7', 'Dimsum', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-7', 'Dimsum', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-8">
+                <img src="img/Burger.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Burger</div>
+                    <div class="card-price">7K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-8', 'Burger', 7000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-8', 'Burger', 7000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-8', 'Burger', 7000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-9">
+                <img src="img/Bakso Bakar.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Bakso Bakar</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-9', 'Bakso Bakar', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-9', 'Bakso Bakar', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-9', 'Bakso Bakar', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-10">
+                <img src="img/Tahu Bakar.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Tahu Bakar</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-10', 'Tahu Bakar', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-10', 'Tahu Bakar', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-10', 'Tahu Bakar', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-11">
+                <img src="img/Sosis Bakar.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Sosis Bakar</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-11', 'Sosis Bakar', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-11', 'Sosis Bakar', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-11', 'Sosis Bakar', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-12">
+                <img src="img/Roti Bakar.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Roti Bakar</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-12', 'Roti Bakar', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-12', 'Roti Bakar', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-12', 'Roti Bakar', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-13">
+                <img src="img/Sandwich.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Sandwich</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-13', 'Sandwich', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-13', 'Sandwich', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-13', 'Sandwich', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-14">
+                <img src="img/Crispy Chicken.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Crispy Chicken</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-14', 'Crispy Chicken', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-14', 'Crispy Chicken', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-14', 'Crispy Chicken', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="category-title">Minuman Dingin</h3>
+        <div class="menu-grid">
+            <div class="food-card" id="card-15">
+                <img src="img/Aneka Macam Pop Ice.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Aneka Macam Pop Ice</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-15', 'Aneka Macam Pop Ice', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-15', 'Aneka Macam Pop Ice', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-15', 'Aneka Macam Pop Ice', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-16">
+                <img src="img/Kopi Aren.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Kopi Aren</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-16', 'Kopi Aren', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-16', 'Kopi Aren', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-16', 'Kopi Aren', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-17">
+                <img src="img/Jeruk Peras.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Jeruk Peras</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-17', 'Jeruk Peras', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-17', 'Jeruk Peras', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-17', 'Jeruk Peras', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-18">
+                <img src="img/Green Tea.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Green Tea</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-18', 'Green Tea', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-18', 'Green Tea', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-18', 'Green Tea', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-19">
+                <img src="img/Thai Tea.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Thai Tea</div>
+                    <div class="card-price">10K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-19', 'Thai Tea', 10000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-19', 'Thai Tea', 10000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-19', 'Thai Tea', 10000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-20">
+                <img src="img/X-tra Jos.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">X-tra Joss</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-20', 'X-tra Jos', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-20', 'X-tra Jos', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-20', 'X-tra Jos', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="category-title">Minuman Panas</h3>
+        <div class="menu-grid">
+            <div class="food-card" id="card-21">
+                <img src="img/Kopi Susu.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Kopi Susu</div>
+                    <div class="card-price">7K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-21', 'Kopi Susu', 7000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-21', 'Kopi Susu', 7000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-21', 'Kopi Susu', 7000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-22">
+                <img src="img/Kopi Hitam.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Kopi Hitam</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-22', 'Kopi Hitam', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-22', 'Kopi Hitam', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-22', 'Kopi Hitam', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-23">
+                <img src="img/Teh Susu.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Teh Susu</div>
+                    <div class="card-price">7K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-23', 'Teh Susu', 7000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-23', 'Teh Susu', 7000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-23', 'Teh Susu', 7000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="food-card" id="card-24">
+                <img src="img/Teh.jpg" alt="Menu" class="card-img">
+                <div class="card-info">
+                    <div class="card-name">Teh</div>
+                    <div class="card-price">5K</div>
+                    <div class="action-area">
+                        <button class="btn-add" onclick="tambahItem('card-24', 'Teh', 5000)">+ Tambah</button>
+                        <div class="qty-control">
+                            <button class="btn-qty" onclick="kurangItem('card-24', 'Teh', 5000)">-</button>
+                            <span class="qty-display">0</span>
+                            <button class="btn-qty" onclick="tambahItem('card-24', 'Teh', 5000)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="bottom-bar" id="bottomBar">
+        <div class="total-info">
+            <span class="total-items" id="totalItems">0 Item</span>
+            <span class="total-price" id="totalPrice">Rp 0</span>
+        </div>
+        <a href="#" onclick="kirimKeWA()" class="btn-checkout">
+            Pesan via WA &nbsp; <span style="font-size:1.2rem;">&#10140;</span>
+        </a>
+    </div>
+
+    <script>
+        let keranjang = {};
+        
+        function tambahItem(cardId, nama, harga) {
+            if (!keranjang[nama]) { keranjang[nama] = { harga: harga, qty: 0 }; }
+            keranjang[nama].qty += 1;
+            updateUI(cardId, nama);
+        }
+
+        function kurangItem(cardId, nama, harga) {
+            if (keranjang[nama] && keranjang[nama].qty > 0) {
+                keranjang[nama].qty -= 1;
+                if (keranjang[nama].qty === 0) { delete keranjang[nama]; }
+            }
+            updateUI(cardId, nama);
+        }
+
+        function updateUI(cardId, nama) {
+            const card = document.getElementById(cardId);
+            const btnAdd = card.querySelector('.btn-add');
+            const qtyControl = card.querySelector('.qty-control');
+            const qtyDisplay = card.querySelector('.qty-display');
+
+            let qty = keranjang[nama] ? keranjang[nama].qty : 0;
+
+            if (qty > 0) {
+                card.classList.add('active');
+                btnAdd.style.display = 'none';
+                qtyControl.style.display = 'flex';
+                qtyDisplay.innerText = qty;
+            } else {
+                card.classList.remove('active');
+                btnAdd.style.display = 'block';
+                qtyControl.style.display = 'none';
+            }
+            hitungTotal();
+        }
+
+        function hitungTotal() {
+            let totalHarga = 0;
+            let totalItem = 0;
+            for (let key in keranjang) {
+                totalHarga += keranjang[key].harga * keranjang[key].qty;
+                totalItem += keranjang[key].qty;
+            }
+
+            const bottomBar = document.getElementById('bottomBar');
+            if (totalItem > 0) {
+                bottomBar.style.display = 'flex';
+                document.getElementById('totalItems').innerText = totalItem + ' Item Dipilih';
+                document.getElementById('totalPrice').innerText = 'Total: Rp ' + totalHarga.toLocaleString('id-ID');
+            } else {
+                bottomBar.style.display = 'none';
+            }
+        }
+
+        function kirimKeWA() {
+            let pesan = "Halo Green Box, saya mau pesan:%0A%0A";
+            let total = 0;
+            for (let key in keranjang) {
+                let item = keranjang[key];
+                let subtotal = item.harga * item.qty;
+                total += subtotal;
+                pesan += `- ${key} x${item.qty} = Rp ${subtotal.toLocaleString('id-ID')}%0A`;
+            }
+            pesan += `%0A*Total Bayar: Rp ${total.toLocaleString('id-ID')}*`;
+            pesan += "%0A%0AMohon diproses ya, terima kasih!";
+            
+            // Nomor WA Tujuan
+            window.open(`https://wa.me/6287867562304?text=${pesan}`, '_blank');
+        }
+    </script>
+</body>
+</html>
